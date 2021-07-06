@@ -1,0 +1,122 @@
+//1번
+$(function(){//문서가 준비될때까지 기다려주세요.
+		var param = { cate : 'book', name : 'hong'} //객체
+		//$.get('01_server.jsp',param,parseData); => 축약형
+		//get방식으로 보낸다 서버러부터 param이라는 변수를 보낸다음에 parseData 불러줘
+		$.ajax({
+			type : 'get',
+			url : '01_server.jsp',
+			data : param,
+			dataType : text,
+			success : parseData,
+			error : function(){
+				alert('error')	
+			}
+			
+		});
+
+// 2번
+	$(function(){
+		//서버로 보낼 테이터
+		var param = {cate : 'kosmo',name : 'kim'}
+		
+		$.ajax({
+			type : 'get',
+			url :'03_server.jsp',
+			data : param,
+			dataType : 'xml', // text/xml/html/json... 으로도 받을 수 있다.
+			success : parseData //성공하면 parseData 함수를 적용하겠다
+		});
+	
+		function parseData(xmlInfo){
+			//alert(xmlInfo)
+			$('#cate').val( $(xmlInfo).find('first').text());
+			$('#name').val( $(xmlInfo).find('second').text());
+		}
+	
+	})
+
+// 3번
+$(function(){
+	// '중복체크' 버튼을 클릭했을 때
+	$('#id_check').click(function(){
+	//$('.userinput').keyup(function(){ //키보드를 누를때마다 중복체크->이벤트 안씀
+		//사용자가 입력한 값을 얻어서
+		$.ajax({//서버로 보낸다
+			type : 'get',
+			data : { 'id' : $('.userinput').val()},
+			//id라는 이름하에 userinput에서 입력한 value값을 가져와라
+			url : 'IdCheck.jsp',
+			dataType : 'text',
+			success : function(data){
+				//alert(data);
+				//******통신으로 데이터를 주고받을 때 공백을 반드시 제거해야한다
+				if(data.trim() == 'YES'){
+					$('#idmessage').text('이미 사용중인 아이디 입니다.');
+					$('#idmessage').show();
+				}else{
+					$('#idmessage').text('사용가능한 아이디 입니다.');
+					$('#idmessage').show();
+				}
+			}
+		})
+		
+	});
+});\
+
+// 4번
+$(function(){
+		//입력버튼이 눌려졌을 때
+		$('#btnInsert').click(function(){
+			//서버로 전송하는 데이터
+			var param = {
+					name : $('#name').val(),
+					age : $('#age').val(),
+					tel : $('#tel').val(),
+					addr : $('#addr').val()
+			}
+			$.ajax({ // 사용자 모르게 서버에 들리는애
+				type : 'post',
+				data : param,
+				url : 'DataInput.jsp',
+				success : function(result){
+					//alert('<'+result+'>'); 
+					if(result.trim() == '1'){
+						alert('입력성공');
+					}
+				}
+			});
+		});
+		
+		//가져오기버튼이 눌렸을 때
+		$('#btnSelect').click(function(){
+			$.ajax({
+				type : 'get',
+				url : 'DataSelect.jsp',
+				data : 'text',
+				success : parseData //연결만 하는것
+			});
+			function parseData(data){
+				//alert(data); 가져오는지 먼저 확인
+				//*********$('선택자',대상)
+				//해당 대상에서 선택자를 찾고자 할때/선택자 뒤에 아무것도 없으면 화면 전체를 뜻함
+				var txt = $('person',data);
+				//alert(txt.length);
+				$('#tbd').empty(); //전체 비우기
+				txt.each(function(){
+					var name = $('name',this).text();
+					var age = $('age',this).text();
+					var tel = $('tel',this).text();
+					var addr = $('addr',this).text();
+					
+					$('#tbd').append('<tr>');
+					$('#tbd').append('<td>' + name + '</td>');
+					$('#tbd').append('<td>' + age + '</td>');
+					$('#tbd').append('<td>' + tel + '</td>');
+					$('#tbd').append('<td>' + addr + '</td>');
+					$('#tbd').append('</tr>');
+				})
+			}
+		});
+		
+	});
